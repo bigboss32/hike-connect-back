@@ -1,0 +1,27 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(apps/base/static/.*|requirements\.txt)$
+      - id: end-of-file-fixer
+        exclude: ^(apps/base/static/.*|requirements\.txt)$
+      - id: check-yaml
+      #- id: check-added-large-files
+      - id: debug-statements
+        name: Check for breakpoints and debugger statements
+
+  - repo: https://github.com/psf/black
+    rev: 23.7.0
+    hooks:
+      - id: black
+
+  - repo: local
+    hooks:
+      - id: check-django-migrations
+        name: Check Django migrations
+        entry: python manage.py makemigrations --check --dry-run --no-input
+        language: system
+        types: [python]
+        pass_filenames: false
+        files: models\.py$

@@ -1,0 +1,59 @@
+# ---- Python ----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.log
+
+# ---- Entorno virtual ----
+.venv
+venv/
+.env.*
+.env
+
+# ---- Archivos de Django ----
+*.sqlite3
+db.sqlite3
+/media/
+staticfiles/
+*.pot
+*.mo
+
+# ---- Migraciones de Django ----
+# ✅ NO ignorar las migraciones (deben versionarse)
+!**/migrations/__init__.py
+!.devcontainer/**
+!scripts/**
+# ---- IDE / Editor ----
+.vscode/
+.idea/
+*.code-workspace
+
+# ---- Docker ----
+*.pid
+*.seed
+*.tar
+docker-compose.override.yml
+
+
+# ---- Coverage / Testing ----
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+.mypy_cache/
+.pyre/
+.pytype/
+.cache/
+
+
+
+
+# ---- Otros ----
+*.bak
+*.swp
+*.swo
+
+# ---- Archivos generados ----
+output/

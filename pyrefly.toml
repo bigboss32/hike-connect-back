@@ -1,0 +1,16 @@
+
+# pyrefly.toml
+
+project-includes = [
+    "app/**"
+]
+
+project-excludes = [
+    "**/migrations/**/*",
+    "**/__pycache__",
+    "**/node_modules",
+    "**/.venv/**/*",
+    "**/*venv/**/*",
+]
+
+strict = true
