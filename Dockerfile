@@ -8,6 +8,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PATH="$PATH:/opt/mssql-tools/bin"
 
 WORKDIR /app
+
+# Dependencias del sistema
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
@@ -27,28 +29,32 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Usuario no root
 RUN useradd -m -u 1000 appuser && \
     mkdir -p /app/staticfiles /app/media && \
     chown -R appuser:appuser /app
 
+# Dependencias Python
 COPY --chown=appuser:appuser requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt gunicorn
 
+# Entrypoint
 COPY --chown=appuser:appuser scripts/entrypoint.sh /app/scripts/entrypoint.sh
 RUN dos2unix /app/scripts/entrypoint.sh && chmod +x /app/scripts/entrypoint.sh
 
+# Código
 COPY --chown=appuser:appuser . /app/
 
 USER appuser
 
+# Render ignora EXPOSE, se deja solo informativo
 EXPOSE 8000
-
-SHELL ["/bin/bash", "-c"]
 
 ENTRYPOINT ["/bin/bash", "/app/scripts/entrypoint.sh"]
 
+# 🚀 Gunicorn escuchando en el PUERTO de Render
 CMD gunicorn inira.wsgi:application \
-    --bind 0.0.0.0:8000 \
+    --bind 0.0.0.0:${PORT} \
     --workers ${GUNICORN_WORKERS} \
     --threads ${GUNICORN_THREADS} \
     --timeout ${GUNICORN_TIMEOUT} \
