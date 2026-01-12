@@ -8,8 +8,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     path(
-        "api/core/",
-        include("inira.app.core.infrastructure.urls"),
+        "api/v1/",
+        include("inira.app.accounts.infrastructure.urls"),
     ),
 
 ]

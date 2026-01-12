@@ -17,6 +17,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    'inira.app.accounts'
 
  
 ]
