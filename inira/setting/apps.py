@@ -14,6 +14,7 @@ THIRD_PARTY_APPS = [
     'rest_framework_simplejwt',
     'drf_spectacular',
     "corsheaders",
+    'rest_framework_simplejwt.token_blacklist', 
 ]
 
 LOCAL_APPS = [

@@ -1,16 +1,20 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 
+from inira.app.accounts.infrastructure.docs.logout_docs import logout_docs
 from inira.app.accounts.infrastructure.docs.register_docs import register_docs 
 from inira.app.accounts.infrastructure.input.login_input_serializer import LoginInputSerializer
+from inira.app.accounts.infrastructure.input.logout_input_serializer import LogoutInputSerializer
 from inira.app.accounts.infrastructure.input.register_input_serializer import RegisterInputSerializer
+from inira.app.accounts.infrastructure.input.update_profile_input_serializer import UpdateProfileInputSerializer
 from inira.app.accounts.infrastructure.out.login_output_serializer import LoginOutputSerializer
 from inira.app.accounts.infrastructure.out.user_output_serializer import UserOutputSerializer
 from inira.app.accounts.infrastructure.docs.login_docs import login_docs
-
+from inira.app.accounts.infrastructure.docs.update_profile_docs import update_profile_docs, get_profile_docs
 
 class LoginAPIView(APIView):
     permission_classes = [AllowAny]
@@ -33,6 +37,7 @@ class LoginAPIView(APIView):
             }).data,
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
 
 class RegisterAPIView(APIView):
     permission_classes = [AllowAny]
@@ -57,3 +62,74 @@ class RegisterAPIView(APIView):
         }
 
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+
+class LogoutAPIView(APIView):
+
+    permission_classes = [AllowAny]  # ← Verificar que esté así
+    authentication_classes = []  # ← Agregar esta línea para deshabilitar completamente la autenticación
+
+    @logout_docs
+    def post(self, request, *args, **kwargs):
+        serializer = LogoutInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            refresh_token = serializer.validated_data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            
+            return Response(
+                {"detail": "Sesión cerrada exitosamente"},
+                status=status.HTTP_205_RESET_CONTENT
+            )
+        except TokenError:
+            return Response(
+                {"detail": "Token inválido o expirado"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"detail": "Error al cerrar sesión"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+
+
+class ProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @get_profile_docs
+    def get(self, request, *args, **kwargs):
+        """Obtener perfil del usuario autenticado"""
+        user = request.user
+        
+        user_data = UserOutputSerializer({
+            "id": user.id,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "bio": getattr(user, 'bio', ''),
+        }).data
+        
+        return Response(user_data, status=status.HTTP_200_OK)
+
+    @update_profile_docs
+    def patch(self, request, *args, **kwargs):
+        """Actualizar perfil del usuario autenticado"""
+        user = request.user
+        serializer = UpdateProfileInputSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        
+        # Actualizar usuario
+        updated_user = serializer.update(user, serializer.validated_data)
+        
+        user_data = UserOutputSerializer({
+            "id": updated_user.id,
+            "email": updated_user.email,
+            "first_name": updated_user.first_name,
+            "last_name": updated_user.last_name,
+            "bio": getattr(updated_user, 'bio', ''),
+        }).data
+        
+        return Response(user_data, status=status.HTTP_200_OK)
