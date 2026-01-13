@@ -11,6 +11,7 @@ from inira.app.accounts.infrastructure.input.login_input_serializer import Login
 from inira.app.accounts.infrastructure.input.logout_input_serializer import LogoutInputSerializer
 from inira.app.accounts.infrastructure.input.register_input_serializer import RegisterInputSerializer
 from inira.app.accounts.infrastructure.input.update_profile_input_serializer import UpdateProfileInputSerializer
+from inira.app.accounts.infrastructure.models import Profile
 from inira.app.accounts.infrastructure.out.login_output_serializer import LoginOutputSerializer
 from inira.app.accounts.infrastructure.out.user_output_serializer import UserOutputSerializer
 from inira.app.accounts.infrastructure.docs.login_docs import login_docs
@@ -101,7 +102,7 @@ class ProfileAPIView(APIView):
 
     @get_profile_docs
     def get(self, request, *args, **kwargs):
-        """Obtener perfil del usuario autenticado"""
+        """Obtener perfil completo del usuario autenticado"""
         user = request.user
         
         user_data = UserOutputSerializer({
@@ -109,7 +110,8 @@ class ProfileAPIView(APIView):
             "email": user.email,
             "first_name": user.first_name,
             "last_name": user.last_name,
-            "bio": getattr(user, 'bio', ''),
+            "bio": user.profile.bio if hasattr(user, 'profile') else '',
+            "avatar": user.profile.avatar if hasattr(user, 'profile') else None,
         }).data
         
         return Response(user_data, status=status.HTTP_200_OK)
@@ -118,18 +120,18 @@ class ProfileAPIView(APIView):
     def patch(self, request, *args, **kwargs):
         """Actualizar perfil del usuario autenticado"""
         user = request.user
+        if not hasattr(user, 'profile'):
+            Profile.objects.create(user=user)
         serializer = UpdateProfileInputSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        
-        # Actualizar usuario
         updated_user = serializer.update(user, serializer.validated_data)
-        
         user_data = UserOutputSerializer({
             "id": updated_user.id,
             "email": updated_user.email,
             "first_name": updated_user.first_name,
             "last_name": updated_user.last_name,
-            "bio": getattr(updated_user, 'bio', ''),
+            "bio": updated_user.profile.bio,
+            "avatar": updated_user.profile.avatar,
         }).data
         
         return Response(user_data, status=status.HTTP_200_OK)

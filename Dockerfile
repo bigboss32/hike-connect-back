@@ -22,6 +22,10 @@ COPY . .
 # Collectstatic
 RUN python manage.py collectstatic --noinput || true
 
+SHELL ["/bin/bash", "-c"]
+
+ENTRYPOINT ["/bin/bash", "/app/scripts/entrypoint.sh"]
+
 # Render asigna PORT automáticamente (por defecto 10000)
 CMD gunicorn inira.wsgi:application \
     --bind 0.0.0.0:$PORT \
