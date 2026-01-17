@@ -3,6 +3,9 @@ services:
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile
+      args:
+        GIT_USER_NAME: ${GIT_AUTHOR_NAME}
+        GIT_USER_EMAIL: ${GIT_AUTHOR_EMAIL}
     container_name: inira_app
     volumes:
       - ..:/app
@@ -20,7 +23,7 @@ services:
     tty: true
 
   postgres:
-    image: postgres:15
+    image: postgis/postgis:15-3.4
     container_name: inira_postgres_db
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -35,5 +38,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
 volumes:
   postgres_data:

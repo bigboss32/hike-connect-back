@@ -2,12 +2,22 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# 🔥 DEPENDENCIAS DEL SISTEMA (PostGIS / GDAL / PROJ + Git)
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
+    binutils \
+    libproj-dev \
+    gdal-bin \
+    libgdal-dev \
     curl \
     dos2unix \
+    git \
     && rm -rf /var/lib/apt/lists/*
+
+# 🔥 Variables para que Django encuentre GDAL y GEOS
+ENV GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
+ENV GEOS_LIBRARY_PATH=/usr/lib/libgeos_c.so
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt \
@@ -15,7 +25,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
 
 COPY . .
 
-# 🔥 FIX CRÍTICO
+# 🔥 FIX CRÍTICO (lo conservamos)
 RUN dos2unix .devcontainer/entrypoint_dev.sh \
     && chmod +x .devcontainer/entrypoint_dev.sh
 

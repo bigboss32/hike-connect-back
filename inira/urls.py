@@ -11,6 +11,10 @@ urlpatterns = [
         "api/v1/",
         include("inira.app.accounts.infrastructure.urls"),
     ),
+        path(
+        "api/v1/",
+        include("inira.app.routes.infrastructure.urls"),
+    ),
 
 ]
 

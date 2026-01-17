@@ -61,7 +61,6 @@ LANGUAGE_CODE = "es-es"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
-
 # ============================================================================
 # REST FRAMEWORK - Configuración para API REST con JWT
 # ============================================================================
