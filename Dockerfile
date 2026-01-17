@@ -5,12 +5,19 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Dependencias del sistema
+# Dependencias del sistema (OBLIGATORIAS para GeoDjango)
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
+    gdal-bin \
+    libgdal-dev \
+    libgeos-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Variables que Django necesita
+ENV GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so
+ENV GEOS_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgeos_c.so
 
 # Dependencias Python
 COPY requirements.txt .
@@ -26,7 +33,6 @@ SHELL ["/bin/bash", "-c"]
 
 ENTRYPOINT ["/bin/bash", "/app/scripts/entrypoint.sh"]
 
-# Render asigna PORT automáticamente (por defecto 10000)
 CMD gunicorn inira.wsgi:application \
     --bind 0.0.0.0:$PORT \
     --workers 4 \
