@@ -16,6 +16,7 @@ from inira.setting.host import (
 )
 
 
+
 SECRET_KEY = os.getenv("SECRET_KEY", "false")
 DEBUG = os.getenv("DJANGO_DEBUG", "False").strip().lower() == "true"
 
@@ -61,53 +62,38 @@ LANGUAGE_CODE = "es-es"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
-# ============================================================================
-# REST FRAMEWORK - Configuración para API REST con JWT
-# ============================================================================
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    
-    # Autenticación JWT - NO requiere CSRF
+
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     
-    # Permisos por defecto
+
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
     
-    # Paginación (opcional)
+
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
-    
-    # Formato de respuestas
+
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
 }
 
-# ============================================================================
-# SIMPLE JWT - Configuración de tokens
-# ============================================================================
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=24),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
-    
-    # Tokens rotatorios (opcional pero recomendado)
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
-    
-    # Algoritmo de firma
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
 }
 
-# ============================================================================
-# SPECTACULAR - Documentación OpenAPI
-# ============================================================================
 SPECTACULAR_SETTINGS = {
     'TITLE': 'API de Senderismo Hike Connect',
     'DESCRIPTION': (
@@ -117,14 +103,11 @@ SPECTACULAR_SETTINGS = {
     ),
     'VERSION': '1.0.0',
     
-    # Idioma de la documentación
     'LANGUAGE': 'es',
     
-    # Configuración de autenticación
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
     
-    # Esquema de seguridad JWT
     'SECURITY': [{'Bearer': []}],
     'APPEND_COMPONENTS': {
         'securitySchemes': {
@@ -137,7 +120,6 @@ SPECTACULAR_SETTINGS = {
         }
     },
     
-    # Configuración de UI
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
         'persistAuthorization': True,
@@ -147,7 +129,6 @@ SPECTACULAR_SETTINGS = {
         'defaultModelExpandDepth': 1,
     },
     
-    # Tags organizados
     'TAGS': [
         {
             'name': 'Autenticación',
@@ -167,7 +148,6 @@ SPECTACULAR_SETTINGS = {
         },
     ],
     
-    # Información de contacto y licencia
     'CONTACT': {
         'name': 'Equipo de Desarrollo',
         'email': 'soporte@hikeconnect.com',
@@ -176,7 +156,7 @@ SPECTACULAR_SETTINGS = {
         'name': 'MIT License',
     },
     
-    # Personalización adicional
+
     'EXTERNAL_DOCS': {
         'description': 'Documentación completa',
         'url': 'https://docs.hikeconnect.com',

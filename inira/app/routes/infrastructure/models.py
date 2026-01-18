@@ -4,7 +4,7 @@
 
 import uuid
 from django.contrib.gis.db import models
-
+from django.conf import settings
 
 class RutaSenderismo(models.Model):
     class Dificultad(models.TextChoices):
@@ -74,3 +74,30 @@ class RutaSenderismo(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class RutaRating(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    ruta = models.ForeignKey(
+        RutaSenderismo,
+        on_delete=models.CASCADE,
+        related_name="ratings"
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="ruta_ratings"
+    )
+
+    score = models.PositiveSmallIntegerField()  # 1 a 5
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("ruta", "user")
+        db_table = "ruta_ratings"
+
+    def __str__(self):
+        return f"{self.ruta.title} - {self.score}"
