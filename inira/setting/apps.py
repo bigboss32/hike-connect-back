@@ -21,6 +21,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     'inira.app.accounts',
     'inira.app.routes',
+    'inira.app.events',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

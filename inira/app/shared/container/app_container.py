@@ -1,5 +1,6 @@
 # inira/app/shared/app_container.py
 from dependency_injector import containers, providers
+from inira.app.events.infrastructure.container import EventsContainer
 from inira.app.routes.infrastructure.container import RoutesContainer
 from inira.app.shared.credentials import SharedContainer
 
@@ -10,3 +11,4 @@ class ApplicationContainer(containers.DeclarativeContainer):
     config = providers.Configuration()
     shared = providers.Container(SharedContainer)
     routes=providers.Container(RoutesContainer)
+    events=providers.Container(EventsContainer)

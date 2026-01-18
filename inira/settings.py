@@ -162,7 +162,7 @@ SPECTACULAR_SETTINGS = {
             'description': 'Operaciones CRUD para rutas de senderismo',
         },
         {
-            'name': 'Experiencias',
+            'name': 'Eventos',
             'description': 'Gestión de experiencias y reseñas de rutas',
         },
     ],
