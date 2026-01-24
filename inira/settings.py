@@ -93,7 +93,6 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
 }
-
 SPECTACULAR_SETTINGS = {
     'TITLE': 'API de Senderismo Hike Connect',
     'DESCRIPTION': (
@@ -127,6 +126,8 @@ SPECTACULAR_SETTINGS = {
         'filter': True,
         'defaultModelsExpandDepth': 1,
         'defaultModelExpandDepth': 1,
+        'tagsSorter': 'alpha',  # Ordena alfabéticamente
+        'operationsSorter': 'alpha',
     },
     
     'TAGS': [
@@ -146,6 +147,22 @@ SPECTACULAR_SETTINGS = {
             'name': 'Eventos',
             'description': 'Gestión de experiencias y reseñas de rutas',
         },
+        {
+            'name': 'Comunidades - Gestión',
+            'description': 'Crear y consultar comunidades',
+        },
+        {
+            'name': 'Comunidades - Miembros',
+            'description': 'Gestión de membresías en comunidades',
+        },
+        {
+            'name': 'Comunidades - Canales',
+            'description': 'Gestión de canales dentro de comunidades',
+        },
+        {
+            'name': 'Comunidades - Posts',
+            'description': 'Gestión de publicaciones en canales',
+        },
     ],
     
     'CONTACT': {
@@ -156,7 +173,6 @@ SPECTACULAR_SETTINGS = {
         'name': 'MIT License',
     },
     
-
     'EXTERNAL_DOCS': {
         'description': 'Documentación completa',
         'url': 'https://docs.hikeconnect.com',

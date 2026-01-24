@@ -15,10 +15,16 @@ urlpatterns = [
         "api/v1/",
         include("inira.app.routes.infrastructure.urls"),
     ),
-            path(
+        path(
         "api/v1/",
         include("inira.app.events.infrastructure.urls"),
     ),
+    
+        path(
+        "api/v1/",
+        include("inira.app.communities.infrastructure.urls"),
+    ),
+
 
 
 ]
