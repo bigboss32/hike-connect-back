@@ -63,15 +63,26 @@ USER django
 EXPOSE 8000
 ENV DJANGO_SETTINGS_MODULE=inira.settings
 
+# ✅ SOLUCIÓN ÓPTIMA: Timeout más corto, reintentos más rápidos
 CMD ["sh", "-c", "\
-echo '🔍 Esperando PostgreSQL...' && \
-until python manage.py migrate --check 2>/dev/null; do sleep 2; done && \
+echo '🔍 Verificando conexión a PostgreSQL...' && \
+max_attempts=30 && \
+attempt=0 && \
+until python manage.py migrate --check 2>/dev/null || [ $attempt -eq $max_attempts ]; do \
+  attempt=$((attempt + 1)); \
+  echo \"Intento $attempt/$max_attempts - Esperando DB...\"; \
+  sleep 1; \
+done && \
+if [ $attempt -eq $max_attempts ]; then \
+  echo '❌ No se pudo conectar a la DB después de 30 intentos'; \
+  exit 1; \
+fi && \
 echo '🚀 Aplicando migraciones...' && \
 python manage.py migrate --noinput && \
 echo '✅ Iniciando Gunicorn...' && \
 exec gunicorn inira.wsgi:application \
-  --bind=0.0.0.0:8000 \
-  --workers=4 \
+  --bind=0.0.0.0:${PORT:-8000} \
+  --workers=${WEB_CONCURRENCY:-4} \
   --timeout=120 \
   --access-logfile=- \
   --error-logfile=- \
