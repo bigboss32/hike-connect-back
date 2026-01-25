@@ -64,12 +64,12 @@ EXPOSE 8000
 ENV DJANGO_SETTINGS_MODULE=inira.settings
 
 CMD ["sh", "-c", "\
-until python manage.py migrate --check >/dev/null 2>&1; do \
-  echo '⏳ waiting for db...'; \
-  sleep 2; \
-done && \
+echo '🔍 Esperando PostgreSQL...' && \
+until python manage.py migrate --check 2>/dev/null; do sleep 2; done && \
+echo '🚀 Aplicando migraciones...' && \
 python manage.py migrate --noinput && \
-gunicorn inira.wsgi:application \
+echo '✅ Iniciando Gunicorn...' && \
+exec gunicorn inira.wsgi:application \
   --bind=0.0.0.0:8000 \
   --workers=4 \
   --timeout=120 \
