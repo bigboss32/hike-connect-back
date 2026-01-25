@@ -1,5 +1,5 @@
 # =============================
-# BUILDER — solo para compilar wheels
+# BUILDER — compila wheels
 # =============================
 FROM python:3.11-slim-bookworm AS builder
 
@@ -18,11 +18,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 
 RUN pip install --upgrade pip && \
-    pip wheel --no-cache-dir --no-deps -r requirements.txt
+    pip wheel --no-cache-dir -r requirements.txt
 
 
 # =============================
-# RUNTIME — imagen final MINIMA
+# RUNTIME — imagen final
 # =============================
 FROM python:3.11-slim-bookworm AS runtime
 
@@ -32,22 +32,20 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# ---- solo libs runtime ----
+# ---- SOLO dependencias runtime ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     gdal-bin \
     libgdal32 \
     libgeos-c1v5 \
     ca-certificates \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get purge -y --auto-remove
+    && rm -rf /var/lib/apt/lists/*
 
-# ---- wheels ya compilados ----
+# ---- instalar wheels ----
 COPY --from=builder /build /wheels
 
 RUN pip install --no-cache-dir /wheels/*.whl \
-    && rm -rf /wheels \
-    /root/.cache
+    && rm -rf /wheels /root/.cache
 
 # ---- copiar código ----
 COPY . .
@@ -63,11 +61,19 @@ RUN addgroup --system django \
 USER django
 
 EXPOSE 8000
+ENV DJANGO_SETTINGS_MODULE=inira.settings
 
-CMD ["gunicorn", "inira.wsgi:application", \
-     "--bind=0.0.0.0:8000", \
-     "--workers=4", \
-     "--timeout=120", \
-     "--access-logfile=-", \
-     "--error-logfile=-", \
-     "--log-level=info"]
+CMD ["sh", "-c", "\
+until python manage.py migrate --check >/dev/null 2>&1; do \
+  echo '⏳ waiting for db...'; \
+  sleep 2; \
+done && \
+python manage.py migrate --noinput && \
+gunicorn inira.wsgi:application \
+  --bind=0.0.0.0:8000 \
+  --workers=4 \
+  --timeout=120 \
+  --access-logfile=- \
+  --error-logfile=- \
+  --log-level=info \
+"]
