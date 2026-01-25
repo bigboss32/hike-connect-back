@@ -1,33 +1,36 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-bookworm
 
 WORKDIR /app
 
-# 🔥 DEPENDENCIAS DEL SISTEMA (PostGIS / GDAL / PROJ + Git)
-RUN apt-get update && apt-get install -y \
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    GDAL_LIBRARY_PATH=/usr/lib/libgdal.so \
+    GEOS_LIBRARY_PATH=/usr/lib/libgeos_c.so
+
+# Instalación más limpia sin dos2unix
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
-    binutils \
     libproj-dev \
     gdal-bin \
     libgdal-dev \
     curl \
-    dos2unix \
     git \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# 🔥 Variables para que Django encuentre GDAL y GEOS
-ENV GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
-ENV GEOS_LIBRARY_PATH=/usr/lib/libgeos_c.so
-
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt \
-    && pip install ipython debugpy
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt ipython debugpy
 
 COPY . .
 
-# 🔥 FIX CRÍTICO (lo conservamos)
-RUN dos2unix .devcontainer/entrypoint_dev.sh \
-    && chmod +x .devcontainer/entrypoint_dev.sh
+# Solo aseguramos permisos de ejecución (sin dos2unix)
+RUN if [ -f ".devcontainer/entrypoint_dev.sh" ]; then \
+        chmod +x .devcontainer/entrypoint_dev.sh; \
+    fi
 
 EXPOSE 8000
 

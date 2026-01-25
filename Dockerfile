@@ -1,42 +1,73 @@
-FROM python:3.11-slim
+# =============================
+# BUILDER — solo para compilar wheels
+# =============================
+FROM python:3.11-slim-bookworm AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-WORKDIR /app
+WORKDIR /build
 
-# Dependencias del sistema (OBLIGATORIAS para GeoDjango)
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
-    gdal-bin \
     libgdal-dev \
     libgeos-dev \
-    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Variables que Django necesita
-ENV GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so
-ENV GEOS_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgeos_c.so
-
-# Dependencias Python
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
 
-# Copiar código
+RUN pip install --upgrade pip && \
+    pip wheel --no-cache-dir --no-deps -r requirements.txt
+
+
+# =============================
+# RUNTIME — imagen final MINIMA
+# =============================
+FROM python:3.11-slim-bookworm AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONOPTIMIZE=1
+
+WORKDIR /app
+
+# ---- solo libs runtime ----
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    gdal-bin \
+    libgdal32 \
+    libgeos-c1v5 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get purge -y --auto-remove
+
+# ---- wheels ya compilados ----
+COPY --from=builder /build /wheels
+
+RUN pip install --no-cache-dir /wheels/*.whl \
+    && rm -rf /wheels \
+    /root/.cache
+
+# ---- copiar código ----
 COPY . .
 
-# Collectstatic
+# ---- recolectar estáticos ----
 RUN python manage.py collectstatic --noinput || true
 
-SHELL ["/bin/bash", "-c"]
+# ---- usuario no root ----
+RUN addgroup --system django \
+    && adduser --system --ingroup django django \
+    && chown -R django:django /app
 
-ENTRYPOINT ["/bin/bash", "/app/scripts/entrypoint.sh"]
+USER django
 
-CMD gunicorn inira.wsgi:application \
-    --bind 0.0.0.0:$PORT \
-    --workers 4 \
-    --timeout 120 \
-    --access-logfile - \
-    --error-logfile - \
-    --log-level info
+EXPOSE 8000
+
+CMD ["gunicorn", "inira.wsgi:application", \
+     "--bind=0.0.0.0:8000", \
+     "--workers=4", \
+     "--timeout=120", \
+     "--access-logfile=-", \
+     "--error-logfile=-", \
+     "--log-level=info"]

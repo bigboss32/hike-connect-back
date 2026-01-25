@@ -9,8 +9,6 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
-    "drf_yasg",
-    "django_json_widget",
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',

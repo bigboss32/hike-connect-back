@@ -2,6 +2,17 @@
 .git
 .gitignore
 .github
+.git
+__pycache__
+*.pyc
+.venv
+env
+node_modules
+media
+staticfiles
+tests
+docs
+coverage
 
 # Python
 __pycache__
@@ -68,3 +79,22 @@ README.md
 # OS
 .DS_Store
 Thumbs.db
+
+.git
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.env.*
+node_modules/
+media/
+static/
+tests/
+docs/
+.vscode/
+.idea/
+*.sqlite3
+.coverage
+htmlcov/
+.scannerwork/

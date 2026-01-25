@@ -1,20 +1,52 @@
-# inira/app/events/domain/entities.py
-
+# inira/app/communities/domain/entities.py
 
 from dataclasses import dataclass
 from datetime import datetime
 
 
 @dataclass
-class EventEntity:
+class ComunidadEntity:
     id: str
-    title: str
-    date: datetime
+    name: str
+    description: str
+    image: str
+    company: str | None
     location: str
-    max_participants: int
+    is_public: bool
+    created_at: datetime
+    created_by_id: int
+    created_by_name: str | None
+    member_count: int
+    user_is_member: bool = False  # ← Agregar esto
 
-    participants_count: int
-    organized_by: str | None
+@dataclass
+class CanalEntity:
+    id: str
+    comunidad_id: str
+    name: str
+    description: str
+    is_info: bool
+    is_read_only: bool
+    created_at: datetime
+    post_count: int
 
-    meeting_point_lat: float | None
-    meeting_point_lng: float | None
+
+@dataclass
+class PostEntity:
+    id: str
+    comunidad_id: str
+    canal_id: str
+    author_id: int
+    author_name: str
+    author_image: str | None
+    content: str
+    created_at: datetime
+
+
+@dataclass
+class MemberEntity:
+    id: str
+    comunidad_id: str
+    user_id: int
+    role: str
+    joined_at: datetime

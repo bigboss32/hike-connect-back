@@ -8,7 +8,7 @@ from drf_spectacular.types import OpenApiTypes
 
 
 delete_community_member_docs = extend_schema(
-        tags=["Comunidades - Miembros"],
+    tags=["Comunidades"],
     summary="Abandonar una comunidad",
     description="Permite al usuario autenticado salir de una comunidad.",
     request={
