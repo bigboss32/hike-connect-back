@@ -47,30 +47,14 @@ COPY . .
 
 RUN python manage.py collectstatic --noinput || true
 
-# ✅ Crear entrypoint inline
+# ✅ Crear entrypoint que ejecuta migraciones directamente
 RUN echo '#!/bin/sh\n\
 set -e\n\
-\n\
-echo "🔍 Esperando PostgreSQL..."\n\
-\n\
-max_attempts=30\n\
-attempt=0\n\
-\n\
-until python manage.py migrate --check 2>/dev/null || [ $attempt -eq $max_attempts ]; do\n\
-  attempt=$((attempt + 1))\n\
-  echo "Intento $attempt/$max_attempts - Esperando DB..."\n\
-  sleep 1\n\
-done\n\
-\n\
-if [ $attempt -eq $max_attempts ]; then\n\
-  echo "❌ No se pudo conectar a PostgreSQL después de $max_attempts intentos"\n\
-  exit 1\n\
-fi\n\
 \n\
 echo "🚀 Aplicando migraciones..."\n\
 python manage.py migrate --noinput\n\
 \n\
-echo "✅ Migraciones aplicadas correctamente"\n\
+echo "✅ Migraciones aplicadas"\n\
 \n\
 exec "$@"\n\
 ' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
