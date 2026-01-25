@@ -44,7 +44,36 @@ COPY --from=builder /build /wheels
 RUN pip install --no-cache-dir /wheels/*.whl && rm -rf /wheels /root/.cache
 
 COPY . .
+
 RUN python manage.py collectstatic --noinput || true
+
+# ✅ Crear entrypoint inline
+RUN echo '#!/bin/sh\n\
+set -e\n\
+\n\
+echo "🔍 Esperando PostgreSQL..."\n\
+\n\
+max_attempts=30\n\
+attempt=0\n\
+\n\
+until python manage.py migrate --check 2>/dev/null || [ $attempt -eq $max_attempts ]; do\n\
+  attempt=$((attempt + 1))\n\
+  echo "Intento $attempt/$max_attempts - Esperando DB..."\n\
+  sleep 1\n\
+done\n\
+\n\
+if [ $attempt -eq $max_attempts ]; then\n\
+  echo "❌ No se pudo conectar a PostgreSQL después de $max_attempts intentos"\n\
+  exit 1\n\
+fi\n\
+\n\
+echo "🚀 Aplicando migraciones..."\n\
+python manage.py migrate --noinput\n\
+\n\
+echo "✅ Migraciones aplicadas correctamente"\n\
+\n\
+exec "$@"\n\
+' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 RUN addgroup --system django \
     && adduser --system --ingroup django django \
@@ -55,33 +84,12 @@ USER django
 EXPOSE 8000
 ENV DJANGO_SETTINGS_MODULE=inira.settings
 
-# ✅ SOLUCIÓN: Gunicorn arranca PRIMERO, migraciones en background
-CMD ["sh", "-c", "\
-echo '🌐 Iniciando Gunicorn...' && \
-gunicorn inira.wsgi:application \
-  --bind=0.0.0.0:${PORT:-8000} \
-  --workers=${WEB_CONCURRENCY:-1} \
-  --timeout=120 \
-  --access-logfile=- \
-  --error-logfile=- \
-  --log-level=info \
-  --preload & \
-GUNICORN_PID=$! && \
-echo '🔍 Esperando PostgreSQL...' && \
-max_attempts=30 && \
-attempt=0 && \
-until python manage.py migrate --check 2>/dev/null || [ $attempt -eq $max_attempts ]; do \
-  attempt=$((attempt + 1)); \
-  echo \"Intento $attempt/$max_attempts\"; \
-  sleep 1; \
-done && \
-if [ $attempt -eq $max_attempts ]; then \
-  echo '❌ DB timeout'; \
-  kill $GUNICORN_PID; \
-  exit 1; \
-fi && \
-echo '🚀 Aplicando migraciones...' && \
-python manage.py migrate --noinput && \
-echo '✅ Migraciones completas' && \
-wait $GUNICORN_PID \
-"]
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+CMD ["gunicorn", "inira.wsgi:application", \
+     "--bind=0.0.0.0:8000", \
+     "--workers=4", \
+     "--timeout=120", \
+     "--access-logfile=-", \
+     "--error-logfile=-", \
+     "--log-level=info"]
