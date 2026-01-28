@@ -1,5 +1,6 @@
 # inira/app/communities/infrastructure/repositories/canal_repository_impl.py
 
+from django.db import IntegrityError
 from django.db.models import Count
 from rest_framework.exceptions import NotFound
 
@@ -11,20 +12,20 @@ from inira.app.communities.infrastructure.models import ComunidadCanal
 class CanalRepositoryImpl(CanalRepository):
 
     def find_by_comunidad(self, comunidad_id: str) -> list[CanalEntity]:
-        canales = ComunidadCanal.objects.filter(
-            comunidad_id=comunidad_id
-        ).annotate(
-            post_count=Count('posts')
-        ).order_by('created_at')
-        
+        canales = (
+            ComunidadCanal.objects.filter(comunidad_id=comunidad_id)
+            .annotate(post_count=Count("posts"))
+            .order_by("created_at")
+        )
+
         return [self._to_entity(canal) for canal in canales]
 
     def find_by_id(self, canal_id: str) -> CanalEntity:
         try:
-            canal = ComunidadCanal.objects.annotate(
-                post_count=Count('posts')
-            ).get(id=canal_id)
-            
+            canal = ComunidadCanal.objects.annotate(post_count=Count("posts")).get(
+                id=canal_id
+            )
+
             return self._to_entity(canal)
         except ComunidadCanal.DoesNotExist:
             raise NotFound("Canal no encontrado")
@@ -38,18 +39,30 @@ class CanalRepositoryImpl(CanalRepository):
         is_info: bool,
         is_read_only: bool,
     ) -> CanalEntity:
-        canal = ComunidadCanal.objects.create(
+
+        # 🔐 chequeo previo
+        if ComunidadCanal.objects.filter(
             comunidad_id=comunidad_id,
-            name=name,
-            description=description,
-            is_info=is_info,
-            is_read_only=is_read_only,
+            name__iexact=name,
+        ).exists():
+            raise NotFound("Ya existe un canal con ese nombre en la comunidad")
+
+        try:
+            canal = ComunidadCanal.objects.create(
+                comunidad_id=comunidad_id,
+                name=name,
+                description=description,
+                is_info=is_info,
+                is_read_only=is_read_only,
+            )
+        except IntegrityError:
+            # 🔥 protección en concurrencia
+            raise NotFound("Ya existe un canal con ese nombre en la comunidad")
+
+        canal = ComunidadCanal.objects.annotate(post_count=Count("posts")).get(
+            id=canal.id
         )
-        
-        canal = ComunidadCanal.objects.annotate(
-            post_count=Count('posts')
-        ).get(id=canal.id)
-        
+
         return self._to_entity(canal)
 
     def exists(self, canal_id: str) -> bool:
@@ -64,5 +77,11 @@ class CanalRepositoryImpl(CanalRepository):
             is_info=canal.is_info,
             is_read_only=canal.is_read_only,
             created_at=canal.created_at,
-            post_count=getattr(canal, 'post_count', 0),
+            post_count=getattr(canal, "post_count", 0),
         )
+
+    def exists_with_name(self, comunidad_id: str, name: str) -> bool:
+        return ComunidadCanal.objects.filter(
+            comunidad_id=comunidad_id,
+            name__iexact=name,
+        ).exists()
