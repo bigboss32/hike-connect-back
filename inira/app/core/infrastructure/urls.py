@@ -1,8 +1,8 @@
 from django.urls import path
 
-from .views import CoreAPIView
+from .views import TestEmailAPIView
 
 urlpatterns = [
-    path("", CoreAPIView.as_view(), name="CoreAPIView"),
+    path("", TestEmailAPIView.as_view(), name="CoreAPIView"),
    
 ]

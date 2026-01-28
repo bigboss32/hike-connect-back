@@ -178,3 +178,7 @@ SPECTACULAR_SETTINGS = {
         'url': 'https://docs.hikeconnect.com',
     },
 }
+
+MAILGUN_DOMAIN = os.environ.get("MAILGUN_DOMAIN")
+MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")

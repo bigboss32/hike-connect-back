@@ -1,6 +1,6 @@
 {
   "name": "Django Dev Container",
-  "dockerComposeFile": "docker-compose.yml",
+  "dockerComposeFile": "../docker-compose.yml",
   "service": "web-dev",
   "workspaceFolder": "/app",
 
@@ -10,26 +10,27 @@
         "ms-python.python",
         "ms-python.vscode-pylance",
         "ms-python.debugpy",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        "ms-python.black-formatter"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python",
         "python.linting.enabled": true,
         "python.linting.pylintEnabled": true,
-        "python.formatting.provider": "black",
-        "editor.formatOnSave": true,
-        "files.eol": "\n"
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          }
+        },
+        "files.eol": "\n",
+        "terminal.integrated.defaultProfile.linux": "bash"
       }
     }
   },
 
   "forwardPorts": [8000],
-  "postCreateCommand": "",
-  "remoteUser": "root",
-
-  // Montar credenciales de Git
-  "mounts": [
-    "source=${localEnv:USERPROFILE}${localEnv:HOME}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
-    "source=${localEnv:USERPROFILE}${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
-  ]
+  "postCreateCommand": "python manage.py migrate",
+  "remoteUser": "root"
 }

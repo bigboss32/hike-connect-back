@@ -1,4 +1,39 @@
 # =============================
+# DEV — desarrollo local
+# =============================
+FROM python:3.11-slim-bookworm AS dev
+
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    GDAL_LIBRARY_PATH=/usr/lib/libgdal.so \
+    GEOS_LIBRARY_PATH=/usr/lib/libgeos_c.so
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    libproj-dev \
+    gdal-bin \
+    libgdal-dev \
+    curl \
+    git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt ipython debugpy
+
+# No copiamos código aquí (viene del volumen)
+# No creamos entrypoint (viene del docker-compose command)
+
+EXPOSE 8000
+
+
+# =============================
 # BUILDER — compila wheels
 # =============================
 FROM python:3.11-slim-bookworm AS builder
@@ -22,7 +57,7 @@ RUN pip install --upgrade pip && \
 
 
 # =============================
-# RUNTIME — imagen final
+# RUNTIME — producción (default)
 # =============================
 FROM python:3.11-slim-bookworm AS runtime
 
@@ -47,7 +82,6 @@ COPY . .
 
 RUN python manage.py collectstatic --noinput || true
 
-# ✅ Crear entrypoint que ejecuta migraciones directamente
 RUN echo '#!/bin/sh\n\
 set -e\n\
 \n\
