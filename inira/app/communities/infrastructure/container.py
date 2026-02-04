@@ -2,19 +2,35 @@
 
 from dependency_injector import containers, providers
 
-from inira.app.communities.infrastructure.repositories.comunidad_repository_impl import ComunidadRepositoryImpl
-from inira.app.communities.infrastructure.repositories.member_repository_impl import MemberRepositoryImpl
-from inira.app.communities.infrastructure.repositories.canal_repository_impl import CanalRepositoryImpl
-from inira.app.communities.infrastructure.repositories.post_repository_impl import PostRepositoryImpl
+from inira.app.communities.infrastructure.repositories.comunidad_repository_impl import (
+    ComunidadRepositoryImpl,
+)
+from inira.app.communities.infrastructure.repositories.member_repository_impl import (
+    MemberRepositoryImpl,
+)
+from inira.app.communities.infrastructure.repositories.canal_repository_impl import (
+    CanalRepositoryImpl,
+)
+from inira.app.communities.infrastructure.repositories.post_repository_impl import (
+    PostRepositoryImpl,
+)
 
 from inira.app.communities.application.use_cases.get_communities import GetCommunities
 from inira.app.communities.application.use_cases.create_community import CreateCommunity
 from inira.app.communities.application.use_cases.join_community import JoinCommunity
 from inira.app.communities.application.use_cases.leave_community import LeaveCommunity
-from inira.app.communities.application.use_cases.get_community_channels import GetCommunityChannels
+from inira.app.communities.application.use_cases.get_community_channels import (
+    GetCommunityChannels,
+)
 from inira.app.communities.application.use_cases.create_channel import CreateChannel
 from inira.app.communities.application.use_cases.get_posts import GetPosts
 from inira.app.communities.application.use_cases.create_post import CreatePost
+from inira.app.communities.application.use_cases.get_community_members import (
+    GetCommunityMembers,
+)
+from inira.app.communities.application.use_cases.get_user_community_stats import (
+    GetUserCommunityStats,
+)
 
 
 class CommunitiesContainer(containers.DeclarativeContainer):
@@ -46,6 +62,18 @@ class CommunitiesContainer(containers.DeclarativeContainer):
 
     leave_community = providers.Factory(
         LeaveCommunity,
+        member_repository=member_repository,
+    )
+
+    # Use Cases - Miembros (NUEVOS)
+    get_community_members = providers.Factory(
+        GetCommunityMembers,
+        comunidad_repository=comunidad_repository,
+        member_repository=member_repository,
+    )
+
+    get_user_community_stats = providers.Factory(
+        GetUserCommunityStats,
         member_repository=member_repository,
     )
 

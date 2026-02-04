@@ -19,6 +19,7 @@ class ComunidadEntity:
     member_count: int
     user_is_member: bool = False  # ← Agregar esto
 
+
 @dataclass
 class CanalEntity:
     id: str
@@ -48,5 +49,7 @@ class MemberEntity:
     id: str
     comunidad_id: str
     user_id: int
+    user_name: str
+    user_image: str | None
     role: str
     joined_at: datetime

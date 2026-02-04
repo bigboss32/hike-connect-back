@@ -6,24 +6,46 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 
-from inira.app.communities.infrastructure.docs.post_community_post_docs import post_community_post_docs
-from inira.app.communities.infrastructure.docs.get_community_posts_docs import get_community_posts_docs
-from inira.app.communities.infrastructure.docs.post_community_channel_docs import post_community_channel_docs
-from inira.app.communities.infrastructure.docs.get_community_channels_docs import get_community_channels_docs
-from inira.app.communities.infrastructure.docs.delete_community_member_docs import delete_community_member_docs
-from inira.app.communities.infrastructure.docs.post_community_member_docs import post_community_member_docs
-from inira.app.communities.infrastructure.docs.post_community_docs import post_community_docs
-from inira.app.communities.infrastructure.docs.get_communities_docs import get_communities_docs
+from inira.app.communities.infrastructure.docs.post_community_post_docs import (
+    post_community_post_docs,
+)
+from inira.app.communities.infrastructure.docs.get_community_posts_docs import (
+    get_community_posts_docs,
+)
+from inira.app.communities.infrastructure.docs.post_community_channel_docs import (
+    post_community_channel_docs,
+)
+from inira.app.communities.infrastructure.docs.get_community_channels_docs import (
+    get_community_channels_docs,
+)
+from inira.app.communities.infrastructure.docs.delete_community_member_docs import (
+    delete_community_member_docs,
+)
+from inira.app.communities.infrastructure.docs.post_community_member_docs import (
+    post_community_member_docs,
+)
+from inira.app.communities.infrastructure.docs.post_community_docs import (
+    post_community_docs,
+)
+from inira.app.communities.infrastructure.docs.get_communities_docs import (
+    get_communities_docs,
+)
+from inira.app.communities.infrastructure.out.member_output_serializer import (
+    MemberOutputSerializer,
+)
 from inira.app.shared.container import container
 from inira.app.communities.infrastructure.out.community_output_serializer import (
     ComunidadOutputSerializer,
     ComunidadDetailOutputSerializer,
 )
+from inira.app.communities.infrastructure.docs.get_community_members_docs import (
+    get_community_members_docs,
+)
 
 
 class ComunidadAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     @get_communities_docs
     def get(self, request, *args, **kwargs):
         """
@@ -37,7 +59,7 @@ class ComunidadAPIView(APIView):
         is_public = request.query_params.get("is_public")
         page = request.query_params.get("page", 1)
         page_size = request.query_params.get("page_size", 10)
-        
+
         try:
             page = int(page)
             page_size = int(page_size)
@@ -60,10 +82,7 @@ class ComunidadAPIView(APIView):
             filters["is_public"] = is_public.lower() == "true"
 
         result = use_case.execute(
-            user_id=request.user.id,
-            page=page,
-            page_size=page_size,
-            **filters
+            user_id=request.user.id, page=page, page_size=page_size, **filters
         )
 
         comunidades = result["results"]
@@ -118,7 +137,70 @@ class ComunidadAPIView(APIView):
 
 
 class ComunidadMemberAPIView(APIView):
+    """
+    Vista para gestionar miembros de comunidades.
+
+    Endpoints:
+    - GET: Obtener miembros de una comunidad O estadísticas del usuario
+    - POST: Unirse a una comunidad
+    - DELETE: Abandonar una comunidad
+    """
+
     permission_classes = [IsAuthenticated]
+
+    @get_community_members_docs
+    def get(self, request, *args, **kwargs):
+        """
+        Dos modos de operación según los query params:
+
+        1. Si incluye 'comunidad_id': Retorna los miembros de esa comunidad
+           Query params:
+           - comunidad_id: UUID (requerido para este modo)
+
+        2. Si incluye 'stats=true': Retorna estadísticas del usuario autenticado
+           Query params:
+           - stats: bool (debe ser 'true')
+        """
+        comunidad_id = request.query_params.get("comunidad_id")
+        get_stats = request.query_params.get("stats", "").lower() == "true"
+
+        # Modo 1: Obtener estadísticas del usuario
+        if get_stats:
+            use_case = container.communities().get_user_community_stats()
+            try:
+                stats = use_case.execute(user_id=request.user.id)
+                return Response(stats, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response(
+                    {"detail": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Modo 2: Obtener miembros de una comunidad
+        if not comunidad_id:
+            return Response(
+                {"detail": "Se requiere 'comunidad_id' o 'stats=true'"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        use_case = container.communities().get_community_members()
+
+        try:
+            members = use_case.execute(
+                comunidad_id=comunidad_id,
+                user_id=request.user.id,
+            )
+
+            serializer = MemberOutputSerializer(members, many=True)
+            return Response(
+                {"count": len(members), "results": serializer.data},
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     @post_community_member_docs
     def post(self, request):
@@ -211,8 +293,9 @@ class ComunidadCanalAPIView(APIView):
             )
 
             from inira.app.communities.infrastructure.out.channel_output_serializer import (
-                CanalOutputSerializer
+                CanalOutputSerializer,
             )
+
             serializer = CanalOutputSerializer(canales, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -244,8 +327,9 @@ class ComunidadCanalAPIView(APIView):
             )
 
             from inira.app.communities.infrastructure.out.channel_output_serializer import (
-                CanalOutputSerializer
+                CanalOutputSerializer,
             )
+
             serializer = CanalOutputSerializer(canal)
             return Response(
                 serializer.data,
@@ -303,8 +387,9 @@ class ComunidadPostAPIView(APIView):
             total = result["count"]
 
             from inira.app.communities.infrastructure.out.post_output_serializer import (
-                PostOutputSerializer
+                PostOutputSerializer,
             )
+
             serializer = PostOutputSerializer(posts, many=True)
 
             return Response(
@@ -341,8 +426,9 @@ class ComunidadPostAPIView(APIView):
             )
 
             from inira.app.communities.infrastructure.out.post_output_serializer import (
-                PostOutputSerializer
+                PostOutputSerializer,
             )
+
             serializer = PostOutputSerializer(post)
             return Response(
                 serializer.data,
