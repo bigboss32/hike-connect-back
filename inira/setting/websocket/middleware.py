@@ -22,9 +22,16 @@ def get_user_from_jwt(token_string):
 
         # Obtener el usuario
         user = User.objects.get(id=user_id)
+        print(f"✅ Usuario autenticado: {user.username} (ID: {user.id})")
         return user
-    except (InvalidToken, TokenError, User.DoesNotExist, KeyError) as e:
-        print(f"❌ Error validando JWT: {e}")
+    except (InvalidToken, TokenError) as e:
+        print(f"❌ Token JWT inválido: {e}")
+        return AnonymousUser()
+    except User.DoesNotExist:
+        print(f"❌ Usuario no existe con ID del token")
+        return AnonymousUser()
+    except KeyError as e:
+        print(f"❌ Token no tiene campo user_id: {e}")
         return AnonymousUser()
 
 
@@ -43,11 +50,10 @@ class JWTAuthMiddleware:
         token = query_params.get("token", [None])[0]
 
         if token:
-            # Autenticar usuario con el token JWT
+            print(f"🔑 Token recibido: {token[:50]}...")  # Solo primeros 50 chars
             scope["user"] = await get_user_from_jwt(token)
-            print(f"🔑 JWT recibido, usuario: {scope['user']}")
         else:
+            print("⚠️ No se recibió token en query string")
             scope["user"] = AnonymousUser()
-            print("⚠️ No se recibió token JWT")
 
         return await self.app(scope, receive, send)

@@ -11,15 +11,13 @@ django_asgi_app = get_asgi_application()
 
 # ✅ Importar DESPUÉS de get_asgi_application()
 from inira.setting.websocket import routing
-from inira.setting.websocket.middleware import JWTAuthMiddleware  # ✅ JWT Middleware
+from inira.setting.websocket.middleware import JWTAuthMiddleware
 
 application = ProtocolTypeRouter(
     {
         "http": django_asgi_app,
-        "websocket": AllowedHostsOriginValidator(
-            JWTAuthMiddleware(  # ✅ Usar JWTAuthMiddleware
-                URLRouter(routing.websocket_urlpatterns)
-            )
+        "websocket": AllowedHostsOriginValidator(  # ✅ Valida el host
+            JWTAuthMiddleware(URLRouter(routing.websocket_urlpatterns))
         ),
     }
 )
