@@ -17,6 +17,7 @@ from inira.setting.host import (
 
 
 SECRET_KEY = os.getenv("SECRET_KEY", "false")
+
 DEBUG = os.getenv("DJANGO_DEBUG", "False").strip().lower() == "true"
 
 MIDDLEWARE = [
