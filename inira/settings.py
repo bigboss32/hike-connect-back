@@ -12,9 +12,8 @@ from inira.setting.host import (
     CORS_ALLOWED_ORIGINS,
     CORS_ALLOW_ALL_ORIGINS,
     CORS_ALLOW_CREDENTIALS,
-    SECURE_PROXY_SSL_HEADER
+    SECURE_PROXY_SSL_HEADER,
 )
-
 
 
 SECRET_KEY = os.getenv("SECRET_KEY", "false")
@@ -26,7 +25,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",  
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -55,7 +54,9 @@ TEMPLATES = [
 ASGI_APPLICATION = "inira.asgi.application"
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -66,23 +67,17 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
-    
-
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
     ],
-    
-
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
-
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
     ],
 }
 
@@ -97,88 +92,81 @@ SIMPLE_JWT = {
     "SIGNING_KEY": SECRET_KEY,
 }
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'API de Senderismo Hike Connect',
-    'DESCRIPTION': (
+    "TITLE": "API de Senderismo Hike Connect",
+    "DESCRIPTION": (
         "API REST para la gestión integral de rutas de senderismo. "
         "Permite la creación, consulta, actualización y administración de rutas, "
         "perfiles de usuario, experiencias y actividades relacionadas con senderismo."
     ),
-    'VERSION': '1.0.0',
-    
-    'LANGUAGE': 'es',
-    
-    'SERVE_INCLUDE_SCHEMA': False,
-    'COMPONENT_SPLIT_REQUEST': True,
-    
-    'SECURITY': [{'Bearer': []}],
-    'APPEND_COMPONENTS': {
-        'securitySchemes': {
-            'Bearer': {
-                'type': 'http',
-                'scheme': 'bearer',
-                'bearerFormat': 'JWT',
-                'description': 'Ingrese el token JWT en el formato: Bearer <token>'
+    "VERSION": "1.0.0",
+    "LANGUAGE": "es",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SECURITY": [{"Bearer": []}],
+    "APPEND_COMPONENTS": {
+        "securitySchemes": {
+            "Bearer": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "Ingrese el token JWT en el formato: Bearer <token>",
             }
         }
     },
-    
-    'SWAGGER_UI_SETTINGS': {
-        'deepLinking': True,
-        'persistAuthorization': True,
-        'displayOperationId': False,
-        'filter': True,
-        'defaultModelsExpandDepth': 1,
-        'defaultModelExpandDepth': 1,
-        'tagsSorter': 'alpha',  # Ordena alfabéticamente
-        'operationsSorter': 'alpha',
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": False,
+        "filter": True,
+        "defaultModelsExpandDepth": 1,
+        "defaultModelExpandDepth": 1,
+        "tagsSorter": "alpha",  # Ordena alfabéticamente
+        "operationsSorter": "alpha",
     },
-    
-    'TAGS': [
+    "TAGS": [
         {
-            'name': 'Autenticación',
-            'description': 'Endpoints para autenticación de usuarios (login, registro, renovación de tokens)',
+            "name": "Autenticación",
+            "description": "Endpoints para autenticación de usuarios (login, registro, renovación de tokens)",
         },
         {
-            'name': 'Usuarios',
-            'description': 'Gestión de perfiles de usuario y preferencias',
+            "name": "Usuarios",
+            "description": "Gestión de perfiles de usuario y preferencias",
         },
         {
-            'name': 'Rutas',
-            'description': 'Operaciones CRUD para rutas de senderismo',
+            "name": "Rutas",
+            "description": "Operaciones CRUD para rutas de senderismo",
         },
         {
-            'name': 'Eventos',
-            'description': 'Gestión de experiencias y reseñas de rutas',
+            "name": "Eventos",
+            "description": "Gestión de experiencias y reseñas de rutas",
         },
         {
-            'name': 'Comunidades - Gestión',
-            'description': 'Crear y consultar comunidades',
+            "name": "Comunidades - Gestión",
+            "description": "Crear y consultar comunidades",
         },
         {
-            'name': 'Comunidades - Miembros',
-            'description': 'Gestión de membresías en comunidades',
+            "name": "Comunidades - Miembros",
+            "description": "Gestión de membresías en comunidades",
         },
         {
-            'name': 'Comunidades - Canales',
-            'description': 'Gestión de canales dentro de comunidades',
+            "name": "Comunidades - Canales",
+            "description": "Gestión de canales dentro de comunidades",
         },
         {
-            'name': 'Comunidades - Posts',
-            'description': 'Gestión de publicaciones en canales',
+            "name": "Comunidades - Posts",
+            "description": "Gestión de publicaciones en canales",
         },
     ],
-    
-    'CONTACT': {
-        'name': 'Equipo de Desarrollo',
-        'email': 'soporte@hikeconnect.com',
+    "CONTACT": {
+        "name": "Equipo de Desarrollo",
+        "email": "soporte@hikeconnect.com",
     },
-    'LICENSE': {
-        'name': 'MIT License',
+    "LICENSE": {
+        "name": "MIT License",
     },
-    
-    'EXTERNAL_DOCS': {
-        'description': 'Documentación completa',
-        'url': 'https://docs.hikeconnect.com',
+    "EXTERNAL_DOCS": {
+        "description": "Documentación completa",
+        "url": "https://docs.hikeconnect.com",
     },
 }
 
