@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from datetime import timedelta
-
+from decouple import config
 from inira.setting.paths import *
 from inira.setting.databases import DATABASES
 from inira.setting.logging import LOGGING
@@ -49,7 +49,10 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "inira.wsgi.application"
+# ===============================
+# ASGI / CHANNELS
+# ===============================
+ASGI_APPLICATION = "inira.asgi.application"
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -182,3 +185,12 @@ SPECTACULAR_SETTINGS = {
 MAILGUN_DOMAIN = os.environ.get("MAILGUN_DOMAIN")
 MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [config("REDIS_URL")],
+        },
+    },
+}

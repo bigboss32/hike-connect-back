@@ -65,7 +65,7 @@ docker run --env-file .env -p 8000:8000 registro-calificado-api
 │   │       └── ...
 │   │
 │   ├── Acuerdo/                  # Otra app de Django (ejemplo)
-│   └── registro_calificado/      # Otra app de Django (ejemplo)
+│   └── inira/      # Otra app de Django (ejemplo)
 │
 ├── venv/                         # Entorno virtual local (si no se usa Docker)
 │

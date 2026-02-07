@@ -104,10 +104,5 @@ ENV DJANGO_SETTINGS_MODULE=inira.settings
 
 ENTRYPOINT ["/app/entrypoint.sh"]
 
-CMD ["gunicorn", "inira.wsgi:application", \
-     "--bind=0.0.0.0:8000", \
-     "--workers=4", \
-     "--timeout=120", \
-     "--access-logfile=-", \
-     "--error-logfile=-", \
-     "--log-level=info"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "inira.asgi:application"]
+

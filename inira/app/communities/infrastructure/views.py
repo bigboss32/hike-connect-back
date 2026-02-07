@@ -41,6 +41,7 @@ from inira.app.communities.infrastructure.out.community_output_serializer import
 from inira.app.communities.infrastructure.docs.get_community_members_docs import (
     get_community_members_docs,
 )
+from inira.setting.websocket.utils import broadcast_new_post
 
 
 class ComunidadAPIView(APIView):
@@ -430,6 +431,14 @@ class ComunidadPostAPIView(APIView):
             )
 
             serializer = PostOutputSerializer(post)
+
+            # ✅✅✅ AGREGAR ESTAS 3 LÍNEAS ✅✅✅
+
+            broadcast_new_post(
+                canal_id=str(request.data.get("canal_id")), post_data=serializer.data
+            )
+            # ✅✅✅ FIN DE LAS LÍNEAS NUEVAS ✅✅✅
+
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED,

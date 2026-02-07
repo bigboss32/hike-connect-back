@@ -4,7 +4,10 @@ DJANGO_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+        "daphne", 
+    "channels",
     "django.contrib.staticfiles",
+
     "django.contrib.gis",
 ]
 
