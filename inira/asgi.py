@@ -16,8 +16,6 @@ from inira.setting.websocket.middleware import JWTAuthMiddleware
 application = ProtocolTypeRouter(
     {
         "http": django_asgi_app,
-        "websocket": AllowedHostsOriginValidator(  # ✅ Valida el host
-            JWTAuthMiddleware(URLRouter(routing.websocket_urlpatterns))
-        ),
+        "websocket": JWTAuthMiddleware(URLRouter(routing.websocket_urlpatterns)),
     }
 )
