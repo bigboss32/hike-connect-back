@@ -104,5 +104,5 @@ ENV DJANGO_SETTINGS_MODULE=inira.settings
 
 ENTRYPOINT ["/app/entrypoint.sh"]
 
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "inira.asgi:application"]
+CMD ["sh", "-c", "daphne -b 0.0.0.0 -p $PORT inira.asgi:application"]
 
