@@ -19,13 +19,10 @@ services:
         condition: service_healthy
     stdin_open: true
     tty: true
-    command: >
-      sh -c "
-        echo '🚀 Aplicando migraciones...' &&
-        python manage.py migrate --noinput &&
-        echo '✅ Migraciones aplicadas' &&
-        daphne -b 0.0.0.0 -p 8000 inira.asgi:application
-      "
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: sh -c "python manage.py migrate --noinput && watchfiles --filter python 'daphne -b 0.0.0.0 -p 8000 inira.asgi:application' ."
 
   postgres:
     image: postgis/postgis:15-3.4
@@ -39,7 +36,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5

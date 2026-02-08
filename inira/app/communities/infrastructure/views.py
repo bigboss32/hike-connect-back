@@ -431,14 +431,9 @@ class ComunidadPostAPIView(APIView):
             )
 
             serializer = PostOutputSerializer(post)
-
-            # ✅✅✅ AGREGAR ESTAS 3 LÍNEAS ✅✅✅
-
             broadcast_new_post(
                 canal_id=str(request.data.get("canal_id")), post_data=serializer.data
             )
-            # ✅✅✅ FIN DE LAS LÍNEAS NUEVAS ✅✅✅
-
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED,

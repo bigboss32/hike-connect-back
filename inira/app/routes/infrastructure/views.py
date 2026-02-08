@@ -5,20 +5,32 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
-from inira.app.routes.infrastructure.docs.get_user_route_rating_docs import get_user_route_rating_docs
-from inira.app.routes.infrastructure.docs.get_routes_banner_docs import get_routes_banner_docs
+from inira.app.routes.infrastructure.docs.get_user_route_rating_docs import (
+    get_user_route_rating_docs,
+)
+from inira.app.routes.infrastructure.docs.get_routes_banner_docs import (
+    get_routes_banner_docs,
+)
 from inira.app.routes.infrastructure.docs.rate_route_docs import rate_route_docs
-from inira.app.routes.infrastructure.input.ruta_rating_serializer import RutaRatingInputSerializer
+from inira.app.routes.infrastructure.input.ruta_rating_serializer import (
+    RutaRatingInputSerializer,
+)
 from inira.app.routes.infrastructure.models import RutaRating, RutaSenderismo
-from inira.app.routes.infrastructure.out.ruta_banner_serializer import RutaBannerSerializer
-from inira.app.routes.infrastructure.out.ruta_user_rating_serializer import RutaUserRatingSerializer
+from inira.app.routes.infrastructure.out.ruta_banner_serializer import (
+    RutaBannerSerializer,
+)
+from inira.app.routes.infrastructure.out.ruta_user_rating_serializer import (
+    RutaUserRatingSerializer,
+)
 from inira.app.shared.container import container
 from inira.app.routes.infrastructure.out.route_output_serializer import (
-    RouteOutputSerializer
+    RouteOutputSerializer,
 )
 from inira.app.routes.infrastructure.docs.get_routes_docs import get_routes_docs
 
 from django.db.models import Avg, Count
+
+
 class RutaSenderismoAPIView(APIView):
     permission_classes = [AllowAny]
 
@@ -68,19 +80,15 @@ class RutaSenderismoAPIView(APIView):
         )
 
 
-
 class RutaBannerAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+
     @get_routes_banner_docs
     def get(self, request):
-        rutas = (
-            RutaSenderismo.objects
-            .annotate(
-                rating_avg=Avg("ratings__score"),
-                rating_count=Count("ratings"),
-            )
-            .order_by("-created_at")[:5]  # o por rating si quieres
-        )
+        rutas = RutaSenderismo.objects.annotate(
+            rating_avg=Avg("ratings__score"),
+            rating_count=Count("ratings"),
+        ).order_by("-created_at")[:5]
 
         serializer = RutaBannerSerializer(rutas, many=True)
 
@@ -89,6 +97,7 @@ class RutaBannerAPIView(APIView):
             status=status.HTTP_200_OK,
         )
 
+
 class RutaRatingAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -96,14 +105,7 @@ class RutaRatingAPIView(APIView):
     def get(self, request):
         ruta_id = request.query_params.get("ruta_id")
         ruta = get_object_or_404(RutaSenderismo, id=ruta_id)
-
-        # Calificación del usuario
-        user_rating = RutaRating.objects.filter(
-            ruta=ruta,
-            user=request.user
-        ).first()
-
-        # Estadísticas globales
+        user_rating = RutaRating.objects.filter(ruta=ruta, user=request.user).first()
         stats = RutaRating.objects.filter(ruta=ruta).aggregate(
             rating_avg=Avg("score"),
             rating_count=Count("id"),
@@ -112,12 +114,14 @@ class RutaRatingAPIView(APIView):
         return Response(
             {
                 "score": user_rating.score if user_rating else None,
-                "rating_avg": round(stats["rating_avg"], 1)
-                if stats["rating_avg"] else None,
+                "rating_avg": (
+                    round(stats["rating_avg"], 1) if stats["rating_avg"] else None
+                ),
                 "rating_count": stats["rating_count"],
             },
             status=status.HTTP_200_OK,
         )
+
     @rate_route_docs
     def post(self, request):
         serializer = RutaRatingInputSerializer(data=request.data)
@@ -126,10 +130,7 @@ class RutaRatingAPIView(APIView):
         ruta_id = serializer.validated_data["ruta_id"]
         score = serializer.validated_data["score"]
         ruta = get_object_or_404(RutaSenderismo, id=ruta_id)
-        rating = RutaRating.objects.filter(
-            ruta=ruta,
-            user=request.user
-        ).first()
+        rating = RutaRating.objects.filter(ruta=ruta, user=request.user).first()
 
         if rating:
             rating.score = score

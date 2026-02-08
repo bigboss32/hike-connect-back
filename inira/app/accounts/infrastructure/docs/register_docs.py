@@ -1,8 +1,14 @@
+##register_docs.py
+
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 
-from inira.app.accounts.infrastructure.input.register_input_serializer import RegisterInputSerializer
-from inira.app.accounts.infrastructure.out.login_output_serializer import LoginOutputSerializer
+from inira.app.accounts.infrastructure.input.register_input_serializer import (
+    RegisterInputSerializer,
+)
+from inira.app.accounts.infrastructure.out.login_output_serializer import (
+    LoginOutputSerializer,
+)
 
 
 register_docs = extend_schema(
@@ -29,11 +35,11 @@ register_docs = extend_schema(
                     "email": "nuevo@ejemplo.com",
                     "first_name": "Juan",
                     "last_name": "Pérez",
-                    "full_name": "Juan Pérez"
+                    "full_name": "Juan Pérez",
                 },
             },
             response_only=True,
-            status_codes=['201'],
+            status_codes=["201"],
         ),
         OpenApiExample(
             "Datos de entrada",
@@ -42,25 +48,21 @@ register_docs = extend_schema(
                 "password": "MiPassword123!",
                 "password_confirm": "MiPassword123!",
                 "first_name": "Juan",
-                "last_name": "Pérez"
+                "last_name": "Pérez",
             },
             request_only=True,
         ),
         OpenApiExample(
             "Email ya registrado",
-            value={
-                "email": ["Este email ya está registrado"]
-            },
+            value={"email": ["Este email ya está registrado"]},
             response_only=True,
-            status_codes=['400'],
+            status_codes=["400"],
         ),
         OpenApiExample(
             "Contraseñas no coinciden",
-            value={
-                "password_confirm": ["Las contraseñas no coinciden"]
-            },
+            value={"password_confirm": ["Las contraseñas no coinciden"]},
             response_only=True,
-            status_codes=['400'],
+            status_codes=["400"],
         ),
     ],
 )
