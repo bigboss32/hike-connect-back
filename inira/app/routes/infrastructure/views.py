@@ -32,7 +32,7 @@ from django.db.models import Avg, Count
 
 
 class RutaSenderismoAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @get_routes_docs
     def get(self, request, *args, **kwargs):
@@ -81,7 +81,7 @@ class RutaSenderismoAPIView(APIView):
 
 
 class RutaBannerAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @get_routes_banner_docs
     def get(self, request):
