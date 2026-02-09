@@ -81,7 +81,7 @@ class RutaSenderismoAPIView(APIView):
 
 
 class RutaBannerAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     @get_routes_banner_docs
     def get(self, request):
