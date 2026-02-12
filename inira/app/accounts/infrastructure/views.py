@@ -34,10 +34,14 @@ class LoginAPIView(APIView):
         user = serializer.validated_data["user"]
         refresh = RefreshToken.for_user(user)
 
+        # Obtener roles
+        roles = list(user.groups.values_list("name", flat=True))
+
         return Response(
             {
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
+                "roles": roles,
             }
         )
 
