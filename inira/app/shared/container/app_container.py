@@ -2,12 +2,15 @@
 from dependency_injector import containers, providers
 from inira.app.communities.infrastructure.container import CommunitiesContainer
 from inira.app.events.infrastructure.container import EventsContainer
+from inira.app.payments.infrastructure.container import PaymentsContainer
 from inira.app.routes.infrastructure.container import RoutesContainer
+
 
 class ApplicationContainer(containers.DeclarativeContainer):
     """Contenedor global de la aplicación."""
-    
+
     config = providers.Configuration()
-    routes=providers.Container(RoutesContainer)
-    events=providers.Container(EventsContainer)
-    communities=providers.Container(CommunitiesContainer)
+    routes = providers.Container(RoutesContainer)
+    events = providers.Container(EventsContainer)
+    communities = providers.Container(CommunitiesContainer)
+    payments = providers.Container(PaymentsContainer)
