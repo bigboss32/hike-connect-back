@@ -90,6 +90,26 @@ python manage.py migrate --noinput\n\
 \n\
 echo "✅ Migraciones aplicadas"\n\
 \n\
+echo "👤 Creando superusuario si no existe..."\n\
+python manage.py shell <<EOF\n\
+import os\n\
+from django.contrib.auth import get_user_model\n\
+\n\
+User = get_user_model()\n\
+\n\
+username = os.environ.get("DJANGO_SUPERUSER_USERNAME", "admin")\n\
+email = os.environ.get("DJANGO_SUPERUSER_EMAIL", "admin@email.com")\n\
+password = os.environ.get("DJANGO_SUPERUSER_PASSWORD", "admin123")\n\
+\n\
+if not User.objects.filter(username=username).exists():\n\
+    print("Creando superusuario:", username)\n\
+    User.objects.create_superuser(username=username, email=email, password=password)\n\
+else:\n\
+    print("El superusuario ya existe")\n\
+EOF\n\
+\n\
+echo "✅ Superusuario verificado"\n\
+\n\
 exec "$@"\n\
 ' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
