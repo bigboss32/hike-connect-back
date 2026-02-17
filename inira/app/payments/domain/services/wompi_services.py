@@ -12,3 +12,7 @@ class WompiService(ABC):
     @abstractmethod
     def get_transaction_status(self, transaction_id: str) -> Dict[str, Any]:
         pass
+
+    @abstractmethod
+    def get_financial_institutions(self) -> list:
+        pass

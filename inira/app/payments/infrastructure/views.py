@@ -7,6 +7,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from datetime import datetime
 
+from inira.app.payments.infrastructure.docs.get_financial_institutions_docs import (
+    get_financial_institutions_docs,
+)
 from inira.app.payments.infrastructure.docs.get_payment_status_docs import (
     get_payment_status_docs,
 )
@@ -25,6 +28,28 @@ logger = logging.getLogger(__name__)
 
 class PaymentsAPIView(APIView):
     permission_classes = [IsAuthenticated]
+
+    @get_financial_institutions_docs
+    def get(self, request):
+        """Obtener lista de bancos disponibles para PSE"""
+        try:
+            use_case = container.payments().get_financial_institutions()
+            institutions = use_case.execute()
+
+            return Response({"data": institutions}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(
+                f"[PAYMENTS_API] Error obteniendo bancos - "
+                f"User ID: {request.user.id}, "
+                f"Error: {str(e)}, "
+                f"Type: {type(e).__name__}",
+                exc_info=True,
+            )
+            return Response(
+                {"detail": "Error obteniendo instituciones financieras"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     @post_payment_docs
     def post(self, request):

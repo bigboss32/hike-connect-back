@@ -268,3 +268,54 @@ class WompiServiceImpl(WompiService):
                 exc_info=True,
             )
             raise
+
+    def get_financial_institutions(self) -> list:
+        """Obtiene la lista de bancos PSE disponibles"""
+
+        url = f"{self.base_url}pse/financial_institutions"
+
+        logger.info("[WOMPI_BANKS] Obteniendo instituciones financieras")
+
+        try:
+            response = requests.get(
+                url,
+                headers={"Authorization": f"Bearer {self.public_key}"},
+                timeout=10,
+            )
+
+            logger.info(
+                f"[WOMPI_BANKS] Response recibida - Status Code: {response.status_code}"
+            )
+
+            response.raise_for_status()
+            response_data = response.json()
+
+            institutions = response_data.get("data", [])
+
+            logger.info(
+                f"[WOMPI_BANKS] Instituciones obtenidas - Total: {len(institutions)}"
+            )
+
+            return institutions
+
+        except requests.exceptions.Timeout as e:
+            logger.error(f"[WOMPI_BANKS] Timeout - Error: {str(e)}")
+            raise Exception("Timeout al obtener instituciones financieras")
+
+        except requests.exceptions.HTTPError as e:
+            logger.error(
+                f"[WOMPI_BANKS] HTTP Error - "
+                f"Status Code: {response.status_code}, "
+                f"Response: {response.text}"
+            )
+            raise Exception(f"Error en Wompi API: {response.text}")
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"[WOMPI_BANKS] Request Error - Error: {str(e)}")
+            raise Exception(f"Error de conexión con Wompi: {str(e)}")
+
+        except Exception as e:
+            logger.error(
+                f"[WOMPI_BANKS] Error inesperado - Error: {str(e)}", exc_info=True
+            )
+            raise

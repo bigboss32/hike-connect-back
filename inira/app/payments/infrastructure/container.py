@@ -1,6 +1,9 @@
 # inira/app/payments/infrastructure/containers/payments_container.py
 
 from dependency_injector import containers, providers
+from inira.app.payments.application.use_cases.get_financial_institutions import (
+    GetFinancialInstitutions,
+)
 from inira.app.payments.application.use_cases.process_wompi_payment import (
     ProcessWompiPayment,
 )
@@ -36,4 +39,9 @@ class PaymentsContainer(containers.DeclarativeContainer):
         CheckPaymentStatus,
         wompi_service=wompi_service,
         payment_repository=payment_repository,
+    )
+
+    get_financial_institutions = providers.Factory(
+        GetFinancialInstitutions,
+        wompi_service=wompi_service,
     )
