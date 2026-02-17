@@ -30,13 +30,9 @@ class LoginAPIView(APIView):
     def post(self, request):
         serializer = LoginInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         user = serializer.validated_data["user"]
         refresh = RefreshToken.for_user(user)
-
-        # Obtener roles
         roles = list(user.groups.values_list("name", flat=True))
-
         return Response(
             {
                 "access": str(refresh.access_token),

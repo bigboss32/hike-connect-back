@@ -1,44 +1,52 @@
 # inira/app/shared/email/email_service.py
 
 import os
-import requests
+from mailersend import emails
 from .templates import (
     get_verification_email_template,
     get_password_reset_email_template,
 )
 
-MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
-MAILGUN_API_KEY = os.getenv("MAILGUN_API_KEY")
-MAILGUN_FROM = os.getenv("MAILGUN_FROM")
+MAILERSEND_API_KEY = os.getenv("MAILERSEND_API_KEY")
+MAILERSEND_FROM = os.getenv("MAILERSEND_FROM")
 
 
 def send_email(to_email: str, subject: str, html_content: str, text_content: str):
     """
-    Función genérica para enviar emails a través de Mailgun
+    Función genérica para enviar emails a través de MailerSend
     """
-    url = f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages"
 
-    response = requests.post(
-        url,
-        auth=("api", MAILGUN_API_KEY),
-        data={
-            "from": MAILGUN_FROM,
-            "to": to_email,
-            "subject": subject,
-            "text": text_content,
-            "html": html_content,
+    mailer = emails.NewEmail(MAILERSEND_API_KEY)
+
+    mail_body = {}
+
+    mailer.set_mail_from(
+        {
+            "email": MAILERSEND_FROM,
+            "name": "Maroa",
         },
-        timeout=10,
+        mail_body,
     )
 
-    response.raise_for_status()
+    mailer.set_mail_to(
+        [
+            {
+                "email": to_email,
+            }
+        ],
+        mail_body,
+    )
+
+    mailer.set_subject(subject, mail_body)
+    mailer.set_html_content(html_content, mail_body)
+    mailer.set_plaintext_content(text_content, mail_body)
+
+    response = mailer.send(mail_body)
+
     return response
 
 
 def send_verification_email(to_email: str, code: str):
-    """
-    Envía email de verificación de cuenta con código
-    """
     return send_email(
         to_email=to_email,
         subject="🥾 Verifica tu correo - Maroa",
@@ -48,9 +56,6 @@ def send_verification_email(to_email: str, code: str):
 
 
 def send_password_reset_email(to_email: str, code: str):
-    """
-    Envía email de recuperación de contraseña con código
-    """
     return send_email(
         to_email=to_email,
         subject="🔐 Recupera tu contraseña - Maroa",

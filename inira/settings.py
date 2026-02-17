@@ -171,9 +171,8 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
-MAILGUN_DOMAIN = os.environ.get("MAILGUN_DOMAIN")
-MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY")
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+
+
 WOMPI_BASE_URL = os.environ.get("WOMPI_BASE_URL", default="https://sandbox.wompi.co")
 WOMPI_PRIVATE_KEY = os.environ.get("WOMPI_PRIVATE_KEY")
 WOMPI_INTEGRITY_SECRET = os.environ.get("WOMPI_INTEGRITY_SECRET")

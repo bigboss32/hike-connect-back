@@ -30,20 +30,22 @@ get_payment_status_docs = extend_schema(
         "- `ERROR`: Error en el procesamiento\n\n"
         "**Importante:**\n"
         "- Solo puedes consultar pagos que pertenezcan a tu usuario autenticado\n"
-        "- El estado se actualiza automáticamente al consultar desde Wompi\n"
+        "- El estado se actualiza automáticamente consultando desde Wompi\n"
+        "- El monto se retorna en COP (no en centavos)\n"
         "- Se recomienda implementar un timeout máximo de 5 minutos para el polling\n"
     ),
     parameters=[
         OpenApiParameter(
             name="payment_id",
-            description="ID interno del pago a consultar",
+            description="UUID del pago a consultar",
             required=True,
-            type=OpenApiTypes.INT,
+            type=OpenApiTypes.UUID,  # 🔹 Cambiado de INT a UUID
             location=OpenApiParameter.PATH,
         ),
     ],
     responses={
         200: PaymentStatusOutputSerializer,
+        401: OpenApiTypes.OBJECT,
         403: OpenApiTypes.OBJECT,
         404: OpenApiTypes.OBJECT,
         500: OpenApiTypes.OBJECT,
@@ -54,14 +56,17 @@ get_payment_status_docs = extend_schema(
             name="Estado: Pendiente",
             summary="Pago pendiente de confirmación del banco",
             value={
-                "payment_id": 123,
+                "payment_id": "550e8400-e29b-41d4-a716-446655440000",
                 "transaction_id": "12032750-1771217854-91203",
                 "status": "PENDING",
-                "amount_in_cents": 50000,
-                "reference": "PAY_USER_12_1771217766",
+                "amount": "255000.00",  # 🔹 COP no centavos
+                "reference": "PAY_USER_3_1771217766",
                 "redirect_url": "https://api-sandbox.wompi.co/v1/pse/redirect?ticket_id=12032750177121785491203",
                 "ticket_id": "12032750177121785491203",
                 "return_code": "SUCCESS",
+                "ruta_id": "123e4567-e89b-12d3-a456-426614174000",  # 🆕
+                "booking_date": "2026-04-15",  # 🆕
+                "total_participants": 3,  # 🆕
                 "created_at": "2026-02-16T04:56:06.123456Z",
                 "updated_at": "2026-02-16T04:56:06.123456Z",
             },
@@ -73,14 +78,17 @@ get_payment_status_docs = extend_schema(
             name="Estado: Aprobado",
             summary="Pago aprobado exitosamente",
             value={
-                "payment_id": 123,
+                "payment_id": "550e8400-e29b-41d4-a716-446655440000",
                 "transaction_id": "12032750-1771217854-91203",
                 "status": "APPROVED",
-                "amount_in_cents": 50000,
-                "reference": "PAY_USER_12_1771217766",
+                "amount": "255000.00",
+                "reference": "PAY_USER_3_1771217766",
                 "redirect_url": "https://api-sandbox.wompi.co/v1/pse/redirect?ticket_id=12032750177121785491203",
                 "ticket_id": "12032750177121785491203",
                 "return_code": "SUCCESS",
+                "ruta_id": "123e4567-e89b-12d3-a456-426614174000",
+                "booking_date": "2026-04-15",
+                "total_participants": 3,
                 "created_at": "2026-02-16T04:56:06.123456Z",
                 "updated_at": "2026-02-16T05:01:23.789012Z",
             },
@@ -92,14 +100,17 @@ get_payment_status_docs = extend_schema(
             name="Estado: Rechazado",
             summary="Pago rechazado por el banco",
             value={
-                "payment_id": 123,
+                "payment_id": "550e8400-e29b-41d4-a716-446655440000",
                 "transaction_id": "12032750-1771217854-91203",
                 "status": "DECLINED",
-                "amount_in_cents": 50000,
-                "reference": "PAY_USER_12_1771217766",
+                "amount": "255000.00",
+                "reference": "PAY_USER_3_1771217766",
                 "redirect_url": "https://api-sandbox.wompi.co/v1/pse/redirect?ticket_id=12032750177121785491203",
                 "ticket_id": "12032750177121785491203",
                 "return_code": "FAILED",
+                "ruta_id": "123e4567-e89b-12d3-a456-426614174000",
+                "booking_date": "2026-04-15",
+                "total_participants": 3,
                 "created_at": "2026-02-16T04:56:06.123456Z",
                 "updated_at": "2026-02-16T05:00:15.456789Z",
             },

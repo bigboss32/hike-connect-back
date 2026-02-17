@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RutaSenderismoAPIView,RutaRatingAPIView,RutaBannerAPIView
+from .views import RutaSenderismoAPIView, RutaRatingAPIView, RutaBannerAPIView
 
 urlpatterns = [
     path("rutas/", RutaSenderismoAPIView.as_view(), name="rutas"),

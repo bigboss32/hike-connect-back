@@ -23,10 +23,6 @@ urlpatterns = [
     ),
     path(
         "api/v1/",
-        include("inira.app.core.infrastructure.urls"),
-    ),
-    path(
-        "api/v1/",
         include("inira.app.payments.infrastructure.urls"),
     ),
 ]

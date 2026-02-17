@@ -26,6 +26,7 @@ class GetRoutes:
             difficulty=difficulty,
             category=category,
         )
+        print(total)
 
         return {
             "count": total,

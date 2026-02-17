@@ -1,62 +1,55 @@
-from django.contrib import admin
-from django.contrib.gis.admin import GISModelAdmin
-from django.contrib.gis.db import models
-from django.db.models import Avg, Count
+# inira/app/rutas/admin.py
 
-from .models import RutaSenderismo, RutaRating
+from django.contrib import admin
+from .models import RutaSenderismo, RutaRating, RutaAvailability, RutaImage
+from django.contrib.gis.admin import GISModelAdmin
 
 
 @admin.register(RutaSenderismo)
 class RutaSenderismoAdmin(GISModelAdmin):
-    list_display = (
-        "title",
-        "difficulty",
-        "distance",
-        "type",
-        "category",
-        "rating_avg",
-        "rating_count",
-        "created_at",
-    )
-
-    list_filter = (
-        "difficulty",
-        "type",
-        "category",
-    )
-
-    search_fields = (
+    list_display = [
         "title",
         "location",
-        "description",
-    )
-
-    readonly_fields = (
+        "difficulty",
+        "category",
+        "base_price",
+        "requires_payment",
+        "is_active",
         "created_at",
-        "updated_at",
-        "rating_avg",
-        "rating_count",
-    )
+    ]
+    list_filter = [
+        "difficulty",
+        "type",
+        "category",
+        "requires_payment",
+        "is_active",
+    ]
+    search_fields = ["title", "location", "company"]
+    readonly_fields = ["id", "created_at", "updated_at"]
 
-    formfield_overrides = {
-        models.PointField: {
-            "widget": admin.widgets.AdminTextareaWidget(
-                attrs={"rows": 1, "cols": 40}
-            )
-        }
-    }
 
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.annotate(
-            _rating_avg=Avg("ratings__score"),
-            _rating_count=Count("ratings"),
-        )
+@admin.register(RutaRating)
+class RutaRatingAdmin(admin.ModelAdmin):
+    list_display = ["ruta", "user", "score", "created_at"]
+    list_filter = ["score", "created_at"]
+    search_fields = ["ruta__title", "user__email"]
 
-    @admin.display(description="⭐ Rating promedio", ordering="_rating_avg")
-    def rating_avg(self, obj):
-        return round(obj._rating_avg, 2) if obj._rating_avg else "—"
 
-    @admin.display(description="🧮 Nº ratings", ordering="_rating_count")
-    def rating_count(self, obj):
-        return obj._rating_count
+@admin.register(RutaAvailability)
+class RutaAvailabilityAdmin(admin.ModelAdmin):
+    list_display = [
+        "ruta",
+        "date",
+        "available_slots",
+        "is_available",
+        "created_at",
+    ]
+    list_filter = ["is_available", "date"]
+    search_fields = ["ruta__title"]
+
+
+@admin.register(RutaImage)
+class RutaImageAdmin(admin.ModelAdmin):
+    list_display = ["ruta", "caption", "order", "created_at"]
+    list_filter = ["created_at"]
+    search_fields = ["ruta__title", "caption"]

@@ -11,6 +11,7 @@ from inira.app.payments.domain.services.wompi_services_impl import WompiServiceI
 from inira.app.payments.infrastructure.repositories.payment_repository_impl import (
     PaymentRepositoryImpl,
 )
+from inira.app.routes.infrastructure.repositories import RoutesRepositoryImpl
 
 
 class PaymentsContainer(containers.DeclarativeContainer):
@@ -18,6 +19,7 @@ class PaymentsContainer(containers.DeclarativeContainer):
 
     # Repositories
     payment_repository = providers.Factory(PaymentRepositoryImpl)
+    routes_repository = providers.Factory(RoutesRepositoryImpl)  # 👈
 
     # Services
     wompi_service = providers.Factory(WompiServiceImpl)
@@ -27,6 +29,7 @@ class PaymentsContainer(containers.DeclarativeContainer):
         ProcessWompiPayment,
         wompi_service=wompi_service,
         payment_repository=payment_repository,
+        routes_repository=routes_repository,  # 👈
     )
 
     check_payment_status = providers.Factory(
