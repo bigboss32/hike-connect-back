@@ -1,49 +1,36 @@
 # inira/app/shared/email/email_service.py
 
 import os
-from mailersend import emails
 from .templates import (
     get_verification_email_template,
     get_password_reset_email_template,
 )
 
+import os
+from mailersend import MailerSendClient, EmailBuilder
+
 MAILERSEND_API_KEY = os.getenv("MAILERSEND_API_KEY")
 MAILERSEND_FROM = os.getenv("MAILERSEND_FROM")
 
+ms = MailerSendClient(api_key=MAILERSEND_API_KEY)
+
 
 def send_email(to_email: str, subject: str, html_content: str, text_content: str):
-    """
-    Función genérica para enviar emails a través de MailerSend
-    """
 
-    mailer = emails.NewEmail(MAILERSEND_API_KEY)
-
-    mail_body = {}
-
-    mailer.set_mail_from(
-        {
-            "email": MAILERSEND_FROM,
-            "name": "Maroa",
-        },
-        mail_body,
+    email = (
+        EmailBuilder()
+        .from_email(MAILERSEND_FROM, "Maroa")
+        .to_many([{"email": to_email}])
+        .subject(subject)
+        .html(html_content)
+        .text(text_content)
+        .build()
     )
 
-    mailer.set_mail_to(
-        [
-            {
-                "email": to_email,
-            }
-        ],
-        mail_body,
-    )
-
-    mailer.set_subject(subject, mail_body)
-    mailer.set_html_content(html_content, mail_body)
-    mailer.set_plaintext_content(text_content, mail_body)
-
-    response = mailer.send(mail_body)
+    response = ms.emails.send(email)
 
     return response
+
 
 
 def send_verification_email(to_email: str, code: str):
