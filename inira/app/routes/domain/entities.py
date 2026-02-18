@@ -14,7 +14,7 @@ class Coordinates:
 
 @dataclass
 class RouteEntity:
-    id: str
+
     title: str
     location: str
     distance: str
@@ -27,6 +27,7 @@ class RouteEntity:
     coordinates: Coordinates
 
     # Campos opcionales originales
+    id: Optional[str] = None
     company: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None

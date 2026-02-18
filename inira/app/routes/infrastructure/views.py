@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
+from inira.app.routes.infrastructure.docs.create_route_docs import create_route_docs
 from inira.app.routes.infrastructure.docs.get_user_route_rating_docs import (
     get_user_route_rating_docs,
 )
@@ -12,6 +13,9 @@ from inira.app.routes.infrastructure.docs.get_routes_banner_docs import (
     get_routes_banner_docs,
 )
 from inira.app.routes.infrastructure.docs.rate_route_docs import rate_route_docs
+from inira.app.routes.infrastructure.input.route_input_serializer import (
+    RouteInputSerializer,
+)
 from inira.app.routes.infrastructure.input.ruta_rating_serializer import (
     RutaRatingInputSerializer,
 )
@@ -77,6 +81,19 @@ class RutaSenderismoAPIView(APIView):
                 "results": serializer.data,
             },
             status=status.HTTP_200_OK,
+        )
+
+    @create_route_docs
+    def post(self, request, *args, **kwargs):
+        serializer = RouteInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        use_case = container.routes().create_route()
+        route = use_case.execute(data=serializer.validated_data.copy())
+
+        return Response(
+            RouteOutputSerializer(route).data,
+            status=status.HTTP_201_CREATED,
         )
 
 
