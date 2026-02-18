@@ -28,6 +28,7 @@ class RouteEntity:
 
     # Campos opcionales originales
     id: Optional[str] = None
+    created_by: Optional[str] = None
     company: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None

@@ -8,7 +8,7 @@ class CoordinatesInputSerializer(serializers.Serializer):
 
 
 class RouteInputSerializer(serializers.Serializer):
-    # ── Obligatorios ──────────────────────────────────────────────
+    # Obligatorios
     title = serializers.CharField(max_length=200)
     location = serializers.CharField(max_length=200)
     distance = serializers.CharField(max_length=50)
@@ -23,28 +23,25 @@ class RouteInputSerializer(serializers.Serializer):
     email = serializers.EmailField()
     whatsapp = serializers.CharField(max_length=20)
 
-    # ── Opcionales con defaults del modelo ────────────────────────
-    company = serializers.CharField(max_length=200, required=False, allow_null=True)
+    # 👇 company ahora incluida como opcional
+    company = serializers.CharField(
+        max_length=200, required=False, allow_null=True, allow_blank=True
+    )
 
+    # Pricing
     base_price = serializers.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        required=False,
-        default="0.00",
-        min_value=0,
+        max_digits=10, decimal_places=2, required=False, default="0.00", min_value=0
     )
     requires_payment = serializers.BooleanField(required=False, default=False)
-
     max_capacity = serializers.IntegerField(required=False, default=20, min_value=1)
     min_participants = serializers.IntegerField(required=False, default=1, min_value=1)
     max_participants_per_booking = serializers.IntegerField(
         required=False, default=10, min_value=1
     )
-
     requires_date_selection = serializers.BooleanField(required=False, default=True)
     is_active = serializers.BooleanField(required=False, default=True)
 
-    # TextField blank=True → no son required, default vacío
+    # Info adicional
     included_services = serializers.CharField(
         required=False, allow_blank=True, default=""
     )

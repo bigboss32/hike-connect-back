@@ -16,17 +16,22 @@ class RoutesRepositoryImpl(RoutesRepository):
     def save(self, route: RouteEntity) -> RouteEntity:
         data = route.__dict__.copy()
 
-        # 🔹 Mapear coordenadas dominio → ORM
+        data.pop("id", None)
+        data.pop("rating_avg", None)
+        data.pop("rating_count", None)
+        data.pop("created_at", None)
+        data.pop("updated_at", None)
+
+        # 👇 Convertir UUID string a FK
+        created_by_id = data.pop("created_by", None)
+        if created_by_id:
+            data["created_by_id"] = created_by_id
+
         coordinates = data.pop("coordinates", None)
         if coordinates:
             data["coordinates"] = f"POINT({coordinates.lng} {coordinates.lat})"
 
-        # 🔹 Remover campos calculados que no existen en el modelo
-        data.pop("rating_avg", None)
-        data.pop("rating_count", None)
-
         model = RutaSenderismo.objects.create(**data)
-
         return self._to_entity(model)
 
     def find_by_id(self, id: str) -> RouteEntity:
@@ -176,4 +181,5 @@ class RoutesRepositoryImpl(RoutesRepository):
             # 🆕 Campos calculados (del annotate)
             rating_avg=float(rating_avg) if rating_avg else None,
             rating_count=rating_count or 0,
+            created_by=str(model.created_by) if model.created_by else None,
         )

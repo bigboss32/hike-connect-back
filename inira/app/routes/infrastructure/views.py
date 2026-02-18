@@ -34,6 +34,8 @@ from inira.app.routes.infrastructure.docs.get_routes_docs import get_routes_docs
 
 from django.db.models import Avg, Count
 
+from inira.app.shared.permissions import require_group
+
 
 class RutaSenderismoAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -83,13 +85,17 @@ class RutaSenderismoAPIView(APIView):
             status=status.HTTP_200_OK,
         )
 
+    @require_group("Ofertante")
     @create_route_docs
     def post(self, request, *args, **kwargs):
         serializer = RouteInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         use_case = container.routes().create_route()
-        route = use_case.execute(data=serializer.validated_data.copy())
+        route = use_case.execute(
+            data=serializer.validated_data.copy(),
+            user_id=str(request.user.id),
+        )
 
         return Response(
             RouteOutputSerializer(route).data,
