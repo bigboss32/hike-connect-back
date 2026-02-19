@@ -42,3 +42,15 @@ class RoutesRepository(ABC):
     def check_availability(self, ruta_id: str, date, number_of_people: int) -> bool:
         """Verifica si hay cupos disponibles"""
         pass
+
+    # inira/app/routes/domain/repositories.py — agregar abstractmethod
+
+    @abstractmethod
+    def paginate_by_user(
+        self,
+        *,
+        user_id: str,
+        page: int,
+        page_size: int,
+    ) -> Tuple[int, List[RouteEntity]]:
+        pass

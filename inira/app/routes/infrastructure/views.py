@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
+from inira.app.routes.infrastructure.docs.get_my_routes_docs import get_my_routes_docs
 from inira.app.routes.infrastructure.docs.create_route_docs import create_route_docs
 from inira.app.routes.infrastructure.docs.get_user_route_rating_docs import (
     get_user_route_rating_docs,
@@ -100,6 +101,28 @@ class RutaSenderismoAPIView(APIView):
         return Response(
             RouteOutputSerializer(route).data,
             status=status.HTTP_201_CREATED,
+        )
+
+
+class MyRoutesAPIView(APIView):  # 👈 view separado, más limpio
+    permission_classes = [IsAuthenticated]
+
+    @require_group("Ofertante")
+    @get_my_routes_docs
+    def get(self, request, *args, **kwargs):
+        page = int(request.query_params.get("page", 1))
+        page_size = int(request.query_params.get("page_size", 10))
+
+        use_case = container.routes().get_my_routes()
+        result = use_case.execute(
+            user_id=str(request.user.id),
+            page=page,
+            page_size=page_size,
+        )
+
+        return Response(
+            result
+            | {"results": RouteOutputSerializer(result["results"], many=True).data}
         )
 
 

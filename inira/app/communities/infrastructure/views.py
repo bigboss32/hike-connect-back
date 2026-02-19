@@ -41,6 +41,7 @@ from inira.app.communities.infrastructure.out.community_output_serializer import
 from inira.app.communities.infrastructure.docs.get_community_members_docs import (
     get_community_members_docs,
 )
+from inira.app.shared.permissions import require_group
 from inira.setting.websocket.utils import broadcast_new_post
 
 
@@ -101,6 +102,7 @@ class ComunidadAPIView(APIView):
             status=status.HTTP_200_OK,
         )
 
+    @require_group("Ofertante")
     @post_community_docs
     def post(self, request):
         """

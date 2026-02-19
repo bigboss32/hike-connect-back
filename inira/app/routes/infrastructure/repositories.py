@@ -183,3 +183,26 @@ class RoutesRepositoryImpl(RoutesRepository):
             rating_count=rating_count or 0,
             created_by=str(model.created_by) if model.created_by else None,
         )
+
+    def paginate_by_user(
+        self,
+        *,
+        user_id: str,
+        page: int,
+        page_size: int,
+    ) -> Tuple[int, List[RouteEntity]]:
+
+        queryset = (
+            RutaSenderismo.objects.annotate(
+                rating_avg=Avg("ratings__score"),
+                rating_count=Count("ratings"),
+            )
+            .filter(created_by_id=user_id)
+            .order_by("-created_at")
+        )
+
+        total = queryset.count()
+        offset = (page - 1) * page_size
+        routes = [self._to_entity(m) for m in queryset[offset : offset + page_size]]
+
+        return total, routes
